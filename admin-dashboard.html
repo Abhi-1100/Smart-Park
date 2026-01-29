@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Parking - Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --yellow: #FFD700;
+            --yellow-bright: #FFF200;
+            --yellow-dark: #E6C200;
+            --black: #0A0A0A;
+            --black-light: #1A1A1A;
+            --black-lighter: #2A2A2A;
+            --white: #FFFFFF;
+            --gray: #666666;
+            --success: #00FF88;
+            --danger: #FF3366;
+        }
+
+        body {
+            font-family: 'Space Mono', monospace;
+            background: var(--black);
+            color: var(--white);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .background-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(255, 215, 0, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 215, 0, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Login Screen */
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 1;
+            padding: 20px;
+        }
+
+        .login-box {
+            background: var(--black-light);
+            border: 3px solid var(--yellow);
+            padding: 50px 40px;
+            max-width: 450px;
+            width: 100%;
+            position: relative;
+            box-shadow: 0 0 80px rgba(255, 215, 0, 0.2);
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-box::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            background: linear-gradient(45deg, var(--yellow), transparent);
+            z-index: -1;
+            opacity: 0.1;
+        }
+
+        .login-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--yellow);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .login-subtitle {
+            text-align: center;
+            color: var(--gray);
+            margin-bottom: 40px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-label {
+            display: block;
+            color: var(--yellow);
+            margin-bottom: 8px;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 15px;
+            background: var(--black);
+            border: 2px solid var(--black-lighter);
+            color: var(--white);
+            font-family: 'Space Mono', monospace;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--yellow);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+        }
+
+        .btn {
+            padding: 15px 40px;
+            border: none;
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: var(--yellow);
+            color: var(--black);
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background: var(--yellow-bright);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .error-message {
+            background: rgba(255, 51, 102, 0.2);
+            border: 2px solid var(--danger);
+            color: var(--danger);
+            padding: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        /* Dashboard */
+        .dashboard {
+            display: none;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            background: var(--black-light);
+            border-bottom: 3px solid var(--yellow);
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .logo {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--yellow);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-name {
+            color: var(--white);
+            font-weight: 700;
+        }
+
+        .btn-logout {
+            background: transparent;
+            color: var(--yellow);
+            border: 2px solid var(--yellow);
+            padding: 10px 25px;
+        }
+
+        .btn-logout:hover {
+            background: var(--yellow);
+            color: var(--black);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: var(--black-light);
+            border: 2px solid var(--yellow);
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(255, 215, 0, 0.2);
+            border-color: var(--yellow-bright);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: var(--yellow);
+            opacity: 0.05;
+            transform: rotate(45deg) translate(50%, -50%);
+        }
+
+        .stat-label {
+            color: var(--gray);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-family: 'Syne', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--yellow);
+        }
+
+        .controls {
+            background: var(--black-light);
+            border: 2px solid var(--black-lighter);
+            padding: 25px;
+            margin-bottom: 30px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .btn-export {
+            background: var(--yellow);
+            color: var(--black);
+            padding: 12px 30px;
+        }
+
+        .btn-export:hover {
+            background: var(--yellow-bright);
+        }
+
+        .table-container {
+            background: var(--black-light);
+            border: 2px solid var(--yellow);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: var(--yellow);
+            color: var(--black);
+        }
+
+        th {
+            padding: 20px 15px;
+            text-align: left;
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
+        }
+
+        td {
+            padding: 20px 15px;
+            border-bottom: 1px solid var(--black-lighter);
+        }
+
+        tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        tbody tr:hover {
+            background: rgba(255, 215, 0, 0.05);
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 3px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: inline-block;
+        }
+
+        .status-parked {
+            background: rgba(0, 255, 136, 0.2);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .status-exited {
+            background: rgba(255, 215, 0, 0.2);
+            color: var(--yellow);
+            border: 1px solid var(--yellow);
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--gray);
+            font-size: 1.1rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--yellow);
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                padding: 15px 20px;
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .logo {
+                font-size: 1.5rem;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            .search-box {
+                width: 100%;
+            }
+
+            table {
+                font-size: 0.85rem;
+            }
+
+            th, td {
+                padding: 12px 10px;
+            }
+
+            .stat-value {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-grid"></div>
+
+    <!-- Login Screen -->
+    <div class="login-container" id="loginContainer">
+        <div class="login-box">
+            <h1 class="login-title">Smart Parking</h1>
+            <p class="login-subtitle">Admin Dashboard</p>
+            <div class="error-message" id="errorMessage"></div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label class="form-label" for="email">Email</label>
+                    <input type="email" id="email" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="password">Password</label>
+                    <input type="password" id="password" class="form-input" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="dashboard" id="dashboard">
+        <div class="header">
+            <div class="logo">Smart Parking</div>
+            <div class="user-info">
+                <span class="user-name" id="userName">Admin</span>
+                <button class="btn btn-logout" id="logoutBtn">Logout</button>
+            </div>
+        </div>
+
+        <div class="container">
+            <!-- Statistics -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Vehicles</div>
+                    <div class="stat-value" id="totalVehicles">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Currently Parked</div>
+                    <div class="stat-value" id="currentlyParked">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Exited</div>
+                    <div class="stat-value" id="totalExited">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Today's Revenue</div>
+                    <div class="stat-value">₹<span id="todayRevenue">0</span></div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="controls">
+                <div class="search-box">
+                    <input type="text" id="searchInput" class="form-input" placeholder="Search by plate number...">
+                </div>
+                <button class="btn btn-export" id="exportBtn">Export PDF</button>
+            </div>
+
+            <!-- Data Table -->
+            <div class="table-container">
+                <div class="loading" id="loadingMessage">Loading parking data...</div>
+                <table id="parkingTable" style="display: none;">
+                    <thead>
+                        <tr>
+                            <th>Plate Number</th>
+                            <th>Entry Time</th>
+                            <th>Exit Time</th>
+                            <th>Duration</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                    </tbody>
+                </table>
+                <div class="no-data" id="noDataMessage" style="display: none;">
+                    No parking records found
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <!-- jsPDF for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
+    <script>
+        // Firebase Configuration (full)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDG86kDuFRbaVfvV__chQd_INtadFQnRtM",
+            authDomain: "parking-system-939dd.firebaseapp.com",
+            databaseURL: "https://parking-system-939dd-default-rtdb.firebaseio.com",
+            projectId: "parking-system-939dd",
+            storageBucket: "parking-system-939dd.firebasestorage.app",
+            messagingSenderId: "1026746170660",
+            appId: "1:1026746170660:web:2eaa4bd8ab535139a947b1",
+            measurementId: "G-PXDDGPPYJ2"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const auth = firebase.auth();
+
+        // Parking data storage
+        let parkingData = [];
+        let processedData = [];
+
+        // DOM Elements
+        const loginContainer = document.getElementById('loginContainer');
+        const dashboard = document.getElementById('dashboard');
+        const loginForm = document.getElementById('loginForm');
+        const errorMessage = document.getElementById('errorMessage');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const searchInput = document.getElementById('searchInput');
+        const exportBtn = document.getElementById('exportBtn');
+        const tableBody = document.getElementById('tableBody');
+        const parkingTable = document.getElementById('parkingTable');
+        const loadingMessage = document.getElementById('loadingMessage');
+        const noDataMessage = document.getElementById('noDataMessage');
+
+        // Statistics elements
+        const totalVehiclesEl = document.getElementById('totalVehicles');
+        const currentlyParkedEl = document.getElementById('currentlyParked');
+        const totalExitedEl = document.getElementById('totalExited');
+        const todayRevenueEl = document.getElementById('todayRevenue');
+
+        // Check authentication state
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                loginContainer.style.display = 'none';
+                dashboard.style.display = 'block';
+                document.getElementById('userName').textContent = user.email.split('@')[0];
+                loadParkingData();
+            } else {
+                loginContainer.style.display = 'flex';
+                dashboard.style.display = 'none';
+            }
+        });
+
+        // Login Handler
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+                errorMessage.style.display = 'none';
+            } catch (error) {
+                errorMessage.textContent = 'Invalid credentials. Please try again.';
+                errorMessage.style.display = 'block';
+            }
+        });
+
+        // Logout Handler
+        logoutBtn.addEventListener('click', () => {
+            auth.signOut();
+        });
+
+        // Helper: convert raw object data to parkingData array and update UI
+        function processRawDataObject(dataObj) {
+            parkingData = [];
+            if (dataObj) {
+                Object.keys(dataObj).forEach(key => {
+                    const entry = dataObj[key];
+                    // Support both `number_plate` and `numberPlate` keys
+                    const plateVal = entry.number_plate || entry.numberPlate || entry.plate || '';
+                    if (plateVal && plateVal !== 'NULL') {
+                        parkingData.push({
+                            id: key,
+                            plate: plateVal,
+                            timestamp: entry.date_time || entry.dateTime || entry.timestamp || entry.time
+                        });
+                    }
+                });
+            }
+
+            processedData = processParkingData(parkingData);
+            updateStatistics();
+            renderTable(processedData);
+
+            loadingMessage.style.display = 'none';
+            if (processedData.length > 0) {
+                parkingTable.style.display = 'table';
+                noDataMessage.style.display = 'none';
+            } else {
+                parkingTable.style.display = 'none';
+                noDataMessage.style.display = 'block';
+            }
+        }
+
+        // Load parking data from Firebase, fallback to local numberplate.json
+        function loadParkingData() {
+            const ref = database.ref('numberplate');
+
+            // Try once to see if remote data exists
+            ref.once('value').then(snapshot => {
+                const val = snapshot.val();
+                if (val) {
+                    // Attach real-time listener for updates
+                    ref.on('value', snap => {
+                        processRawDataObject(snap.val());
+                    });
+                    // Process initial snapshot
+                    processRawDataObject(val);
+                } else {
+                    // No remote data, try loading local JSON file
+                    fetch('./numberplate.json')
+                        .then(res => {
+                            if (!res.ok) throw new Error('Local file not found');
+                            return res.json();
+                        })
+                        .then(json => {
+                            // If JSON is an array, convert to object-like shape
+                            if (Array.isArray(json)) {
+                                const obj = {};
+                                json.forEach((item, idx) => obj['local_' + idx] = item);
+                                processRawDataObject(obj);
+                            } else {
+                                processRawDataObject(json);
+                            }
+                        }).catch(err => {
+                            console.warn('No remote data and failed to fetch local numberplate.json', err);
+                            parkingData = [];
+                            processedData = [];
+                            updateStatistics();
+                            renderTable(processedData);
+                            loadingMessage.style.display = 'none';
+                            parkingTable.style.display = 'none';
+                            noDataMessage.style.display = 'block';
+                        });
+                }
+            }).catch(err => {
+                console.error('Error checking remote DB:', err);
+                // Fallback to local JSON
+                fetch('./numberplate.json')
+                    .then(res => res.json())
+                    .then(json => {
+                        if (Array.isArray(json)) {
+                            const obj = {};
+                            json.forEach((item, idx) => obj['local_' + idx] = item);
+                            processRawDataObject(obj);
+                        } else {
+                            processRawDataObject(json);
+                        }
+                    }).catch(e => {
+                        console.warn('Failed to load local numberplate.json', e);
+                        loadingMessage.style.display = 'none';
+                        parkingTable.style.display = 'none';
+                        noDataMessage.style.display = 'block';
+                    });
+            });
+        }
+
+        // Process parking data to determine entry/exit
+        function processParkingData(data) {
+            // Sort by timestamp
+            data.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+            const processed = [];
+            const plateMap = {};
+
+            data.forEach(entry => {
+                const plate = entry.plate;
+
+                if (!plateMap[plate]) {
+                    // First occurrence - Entry
+                    plateMap[plate] = {
+                        plate: plate,
+                        entry: entry.timestamp,
+                        exit: null,
+                        status: 'Parked'
+                    };
+                } else if (plateMap[plate].status === 'Parked') {
+                    // Second occurrence - Exit
+                    plateMap[plate].exit = entry.timestamp;
+                    plateMap[plate].status = 'Exited';
+                    
+                    // Calculate duration and amount
+                    const duration = calculateDuration(plateMap[plate].entry, plateMap[plate].exit);
+                    const amount = calculateAmount(duration);
+                    
+                    plateMap[plate].duration = duration;
+                    plateMap[plate].amount = amount;
+                    
+                    // Add to processed and reset for new entry
+                    processed.push({...plateMap[plate]});
+                    delete plateMap[plate];
+                } else {
+                    // New entry for same plate after exit
+                    processed.push({...plateMap[plate]});
+                    plateMap[plate] = {
+                        plate: plate,
+                        entry: entry.timestamp,
+                        exit: null,
+                        status: 'Parked'
+                    };
+                }
+            });
+
+            // Add remaining parked vehicles
+            Object.values(plateMap).forEach(vehicle => {
+                processed.push(vehicle);
+            });
+
+            return processed.reverse(); // Show newest first
+        }
+
+        // Calculate duration between entry and exit
+        function calculateDuration(entry, exit) {
+            if (!exit) return null;
+            
+            const entryTime = new Date(entry);
+            const exitTime = new Date(exit);
+            const diffMs = exitTime - entryTime;
+            
+            const hours = Math.floor(diffMs / (1000 * 60 * 60));
+            const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+            
+            return { hours, minutes, totalMinutes: Math.floor(diffMs / (1000 * 60)) };
+        }
+
+        // Calculate parking amount
+        function calculateAmount(duration) {
+            if (!duration) return 0;
+            
+            const totalMinutes = duration.totalMinutes;
+            
+            // First 30 minutes free
+            if (totalMinutes <= 30) return 0;
+            
+            // ₹20 per hour after 30 minutes
+            const chargeableMinutes = totalMinutes - 30;
+            const hours = Math.ceil(chargeableMinutes / 60);
+            
+            return hours * 20;
+        }
+
+        // Format duration for display
+        function formatDuration(duration) {
+            if (!duration) return '-';
+            return `${duration.hours}h ${duration.minutes}m`;
+        }
+
+        // Update statistics
+        function updateStatistics() {
+            const parked = processedData.filter(v => v.status === 'Parked').length;
+            const exited = processedData.filter(v => v.status === 'Exited').length;
+            
+            // Calculate today's revenue
+            const today = new Date().toISOString().split('T')[0];
+            const todayRevenue = processedData
+                .filter(v => v.exit && v.exit.startsWith(today))
+                .reduce((sum, v) => sum + (v.amount || 0), 0);
+
+            totalVehiclesEl.textContent = processedData.length;
+            currentlyParkedEl.textContent = parked;
+            totalExitedEl.textContent = exited;
+            todayRevenueEl.textContent = todayRevenue;
+        }
+
+        // Render table
+        function renderTable(data) {
+            tableBody.innerHTML = '';
+
+            data.forEach(vehicle => {
+                const row = document.createElement('tr');
+                
+                const statusClass = vehicle.status === 'Parked' ? 'status-parked' : 'status-exited';
+                
+                row.innerHTML = `
+                    <td><strong>${vehicle.plate}</strong></td>
+                    <td>${formatDateTime(vehicle.entry)}</td>
+                    <td>${vehicle.exit ? formatDateTime(vehicle.exit) : '-'}</td>
+                    <td>${formatDuration(vehicle.duration)}</td>
+                    <td><strong>₹${vehicle.amount || 0}</strong></td>
+                    <td><span class="status-badge ${statusClass}">${vehicle.status}</span></td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Format date time for display
+        function formatDateTime(dateTime) {
+            if (!dateTime) return '-';
+            const date = new Date(dateTime);
+            return date.toLocaleString('en-IN', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // Search functionality
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const filtered = processedData.filter(v => 
+                v.plate.toLowerCase().includes(searchTerm)
+            );
+            renderTable(filtered);
+        });
+
+        // Export to PDF
+        exportBtn.addEventListener('click', () => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Add title
+            doc.setFontSize(20);
+            doc.setTextColor(0, 0, 0);
+            doc.text('Smart Parking System', 14, 20);
+            
+            doc.setFontSize(12);
+            doc.text('Parking Records Report', 14, 28);
+            doc.setFontSize(10);
+            doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 35);
+
+            // Prepare table data
+            const tableData = processedData.map(v => [
+                v.plate,
+                formatDateTime(v.entry),
+                v.exit ? formatDateTime(v.exit) : '-',
+                formatDuration(v.duration),
+                `₹${v.amount || 0}`,
+                v.status
+            ]);
+
+            // Add table
+            doc.autoTable({
+                startY: 45,
+                head: [['Plate', 'Entry', 'Exit', 'Duration', 'Amount', 'Status']],
+                body: tableData,
+                theme: 'grid',
+                headStyles: { fillColor: [255, 215, 0], textColor: [0, 0, 0] },
+                styles: { fontSize: 8 }
+            });
+
+            // Save PDF
+            doc.save(`parking-report-${Date.now()}.pdf`);
+        });
+    </script>
+</body>
+</html>

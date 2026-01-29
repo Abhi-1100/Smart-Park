@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Parking - User Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --yellow: #FFD700;
+            --yellow-bright: #FFF200;
+            --yellow-dark: #E6C200;
+            --black: #0A0A0A;
+            --black-light: #1A1A1A;
+            --black-lighter: #2A2A2A;
+            --white: #FFFFFF;
+            --gray: #666666;
+            --success: #00FF88;
+            --danger: #FF3366;
+        }
+
+        body {
+            font-family: 'Space Mono', monospace;
+            background: var(--black);
+            color: var(--white);
+            line-height: 1.6;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .background-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(255, 215, 0, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 215, 0, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo {
+            font-family: 'Syne', sans-serif;
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--yellow);
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+        }
+
+        .tagline {
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-size: 0.9rem;
+        }
+
+        .search-section {
+            background: var(--black-light);
+            border: 3px solid var(--yellow);
+            padding: 40px;
+            margin-bottom: 40px;
+            position: relative;
+            box-shadow: 0 0 60px rgba(255, 215, 0, 0.2);
+            animation: fadeInUp 0.6s ease-out 0.2s both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .search-section::before {
+            content: '';
+            position: absolute;
+            top: -15px;
+            left: -15px;
+            right: -15px;
+            bottom: -15px;
+            background: linear-gradient(45deg, var(--yellow), transparent);
+            z-index: -1;
+            opacity: 0.1;
+        }
+
+        .search-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--yellow);
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .search-form {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 250px;
+            padding: 18px;
+            background: var(--black);
+            border: 2px solid var(--black-lighter);
+            color: var(--white);
+            font-family: 'Space Mono', monospace;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--yellow);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+        }
+
+        .search-input::placeholder {
+            color: var(--gray);
+            text-transform: none;
+            letter-spacing: 1px;
+        }
+
+        .btn {
+            padding: 18px 40px;
+            border: none;
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-search {
+            background: var(--yellow);
+            color: var(--black);
+        }
+
+        .btn-search:hover {
+            background: var(--yellow-bright);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4);
+        }
+
+        .btn-search:active {
+            transform: translateY(0);
+        }
+
+        .result-section {
+            display: none;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .info-card {
+            background: var(--black-light);
+            border: 2px solid var(--yellow);
+            padding: 35px;
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .info-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 150px;
+            height: 150px;
+            background: var(--yellow);
+            opacity: 0.03;
+            transform: rotate(45deg) translate(50%, -50%);
+        }
+
+        .plate-display {
+            background: var(--yellow);
+            color: var(--black);
+            padding: 20px 30px;
+            font-family: 'Syne', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            text-align: center;
+            letter-spacing: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(255, 215, 0, 0.3);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .info-item {
+            text-align: center;
+        }
+
+        .info-label {
+            color: var(--gray);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+
+        .info-value {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--yellow);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 3px;
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 10px;
+        }
+
+        .status-parked {
+            background: rgba(0, 255, 136, 0.2);
+            color: var(--success);
+            border: 2px solid var(--success);
+        }
+
+        .status-exited {
+            background: rgba(255, 215, 0, 0.2);
+            color: var(--yellow);
+            border: 2px solid var(--yellow);
+        }
+
+        .payment-section {
+            background: var(--black-light);
+            border: 3px solid var(--yellow);
+            padding: 40px;
+            text-align: center;
+        }
+
+        .payment-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--yellow);
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+
+        .amount-display {
+            font-family: 'Syne', sans-serif;
+            font-size: 4rem;
+            font-weight: 800;
+            color: var(--white);
+            margin-bottom: 30px;
+        }
+
+        .amount-display span {
+            color: var(--yellow);
+        }
+
+        .qr-container {
+            background: var(--white);
+            padding: 30px;
+            display: inline-block;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(255, 215, 0, 0.2);
+        }
+
+        #qrcode {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .payment-info {
+            color: var(--gray);
+            font-size: 0.95rem;
+            line-height: 1.8;
+        }
+
+        .alert {
+            background: rgba(255, 215, 0, 0.1);
+            border: 2px solid var(--yellow);
+            color: var(--yellow);
+            padding: 20px;
+            margin-bottom: 25px;
+            text-align: center;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .error-message {
+            background: rgba(255, 51, 102, 0.2);
+            border: 2px solid var(--danger);
+            color: var(--danger);
+            padding: 20px;
+            margin-bottom: 25px;
+            text-align: center;
+            display: none;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--yellow);
+            font-size: 1.2rem;
+            font-weight: 700;
+            display: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 15px;
+            }
+
+            .logo {
+                font-size: 2rem;
+            }
+
+            .search-section {
+                padding: 25px;
+            }
+
+            .search-form {
+                flex-direction: column;
+            }
+
+            .search-input {
+                min-width: 100%;
+            }
+
+            .plate-display {
+                font-size: 1.8rem;
+                padding: 15px 20px;
+                letter-spacing: 4px;
+            }
+
+            .info-value {
+                font-size: 1.4rem;
+            }
+
+            .amount-display {
+                font-size: 3rem;
+            }
+
+            .payment-section {
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-grid"></div>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1 class="logo">Smart Parking</h1>
+            <p class="tagline">Check Your Parking Status</p>
+        </div>
+
+        <!-- Search Section -->
+        <div class="search-section">
+            <h2 class="search-title">Enter Your Vehicle Number</h2>
+            <form class="search-form" id="searchForm">
+                <input 
+                    type="text" 
+                    class="search-input" 
+                    id="plateInput" 
+                    placeholder="e.g., TS15EL5671"
+                    required
+                >
+                <button type="submit" class="btn btn-search">Search</button>
+            </form>
+        </div>
+
+        <!-- Loading -->
+        <div class="loading" id="loadingMessage">Searching...</div>
+
+        <!-- Error Message -->
+        <div class="error-message" id="errorMessage"></div>
+
+        <!-- Result Section -->
+        <div class="result-section" id="resultSection">
+            <!-- Vehicle Info Card -->
+            <div class="info-card">
+                <div class="plate-display" id="plateDisplay"></div>
+                
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Entry Time</div>
+                        <div class="info-value" id="entryTime">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Exit Time</div>
+                        <div class="info-value" id="exitTime">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Duration</div>
+                        <div class="info-value" id="duration">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Status</div>
+                        <div class="info-value">
+                            <span class="status-badge" id="statusBadge">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alert for Parked Vehicles -->
+            <div class="alert" id="parkedAlert" style="display: none;">
+                Your vehicle is currently parked. Amount will be calculated upon exit.
+            </div>
+
+            <!-- Payment Section -->
+            <div class="payment-section" id="paymentSection" style="display: none;">
+                <h3 class="payment-title">Total Payable Amount</h3>
+                <div class="amount-display">₹<span id="paymentAmount">0</span></div>
+                
+                <div class="qr-container">
+                    <div id="qrcode"></div>
+                </div>
+                
+                <div class="payment-info">
+                    Scan the QR code to pay via UPI<br>
+                    <strong>First 30 minutes FREE</strong><br>
+                    ₹20 per hour thereafter
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <!-- QR Code Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            databaseURL: "https://parking-system-939dd-default-rtdb.firebaseio.com"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // DOM Elements
+        const searchForm = document.getElementById('searchForm');
+        const plateInput = document.getElementById('plateInput');
+        const loadingMessage = document.getElementById('loadingMessage');
+        const errorMessage = document.getElementById('errorMessage');
+        const resultSection = document.getElementById('resultSection');
+        const plateDisplay = document.getElementById('plateDisplay');
+        const entryTime = document.getElementById('entryTime');
+        const exitTime = document.getElementById('exitTime');
+        const duration = document.getElementById('duration');
+        const statusBadge = document.getElementById('statusBadge');
+        const parkedAlert = document.getElementById('parkedAlert');
+        const paymentSection = document.getElementById('paymentSection');
+        const paymentAmount = document.getElementById('paymentAmount');
+
+        let qrCode = null;
+        // UPI config (will be loaded from config.json if present)
+        let upiConfig = {
+            upiId: 'parking@upi',
+            upiName: 'Smart Parking System'
+        };
+
+        // Try to load config.json to override defaults (so users can edit a single file)
+        fetch('./config.json').then(res => {
+            if (!res.ok) throw new Error('config.json not found');
+            return res.json();
+        }).then(cfg => {
+            if (cfg.upiId) upiConfig.upiId = cfg.upiId;
+            if (cfg.upiName) upiConfig.upiName = cfg.upiName;
+        }).catch(() => {
+            // No config.json found; using defaults
+        });
+
+        // Search form handler
+        searchForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const plate = plateInput.value.trim().toUpperCase();
+            
+            if (!plate) return;
+
+            // Show loading
+            loadingMessage.style.display = 'block';
+            errorMessage.style.display = 'none';
+            resultSection.style.display = 'none';
+
+            try {
+                const vehicleData = await searchVehicle(plate);
+                
+                if (vehicleData) {
+                    displayResults(vehicleData);
+                } else {
+                    showError('Vehicle not found. Please check the number plate and try again.');
+                }
+            } catch (error) {
+                showError('Error fetching data. Please try again.');
+                console.error(error);
+            } finally {
+                loadingMessage.style.display = 'none';
+            }
+        });
+
+        // Search vehicle in Firebase
+        async function searchVehicle(plate) {
+            const ref = database.ref('numberplate');
+            const snapshot = await ref.once('value');
+            const data = snapshot.val();
+
+            if (!data) return null;
+
+            // Find all entries for this plate (excluding NULL)
+            const entries = [];
+            Object.keys(data).forEach(key => {
+                const entry = data[key];
+                if (entry.number_plate === plate && entry.number_plate !== 'NULL') {
+                    entries.push({
+                        id: key,
+                        plate: entry.number_plate,
+                        timestamp: entry.date_time
+                    });
+                }
+            });
+
+            if (entries.length === 0) return null;
+
+            // Sort by timestamp
+            entries.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+            // Determine entry/exit
+            let vehicleInfo = {
+                plate: plate,
+                entry: entries[0].timestamp,
+                exit: null,
+                status: 'Parked'
+            };
+
+            // If there are 2 or more entries, the second one is exit
+            if (entries.length >= 2) {
+                vehicleInfo.exit = entries[1].timestamp;
+                vehicleInfo.status = 'Exited';
+                
+                // Calculate duration and amount
+                const dur = calculateDuration(vehicleInfo.entry, vehicleInfo.exit);
+                vehicleInfo.duration = dur;
+                vehicleInfo.amount = calculateAmount(dur);
+            }
+
+            return vehicleInfo;
+        }
+
+        // Calculate duration between entry and exit
+        function calculateDuration(entry, exit) {
+            if (!exit) return null;
+            
+            const entryTime = new Date(entry);
+            const exitTime = new Date(exit);
+            const diffMs = exitTime - entryTime;
+            
+            const hours = Math.floor(diffMs / (1000 * 60 * 60));
+            const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+            
+            return { hours, minutes, totalMinutes: Math.floor(diffMs / (1000 * 60)) };
+        }
+
+        // Calculate parking amount
+        function calculateAmount(duration) {
+            if (!duration) return 0;
+            
+            const totalMinutes = duration.totalMinutes;
+            
+            // First 30 minutes free
+            if (totalMinutes <= 30) return 0;
+            
+            // ₹20 per hour after 30 minutes
+            const chargeableMinutes = totalMinutes - 30;
+            const hours = Math.ceil(chargeableMinutes / 60);
+            
+            return hours * 20;
+        }
+
+        // Format duration for display
+        function formatDuration(duration) {
+            if (!duration) return '-';
+            return `${duration.hours}h ${duration.minutes}m`;
+        }
+
+        // Format date time for display
+        function formatDateTime(dateTime) {
+            if (!dateTime) return '-';
+            const date = new Date(dateTime);
+            return date.toLocaleString('en-IN', {
+                day: '2-digit',
+                month: 'short',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // Display results
+        function displayResults(vehicle) {
+            // Show result section
+            resultSection.style.display = 'block';
+
+            // Display vehicle info
+            plateDisplay.textContent = vehicle.plate;
+            entryTime.textContent = formatDateTime(vehicle.entry);
+            exitTime.textContent = vehicle.exit ? formatDateTime(vehicle.exit) : '-';
+            duration.textContent = formatDuration(vehicle.duration);
+
+            // Status badge
+            statusBadge.textContent = vehicle.status;
+            statusBadge.className = 'status-badge ' + 
+                (vehicle.status === 'Parked' ? 'status-parked' : 'status-exited');
+
+            // Show/hide sections based on status
+            if (vehicle.status === 'Parked') {
+                parkedAlert.style.display = 'block';
+                paymentSection.style.display = 'none';
+            } else {
+                parkedAlert.style.display = 'none';
+                paymentSection.style.display = 'block';
+                
+                // Display amount
+                paymentAmount.textContent = vehicle.amount || 0;
+
+                // Generate QR code
+                generateQRCode(vehicle.plate, vehicle.amount || 0);
+            }
+        }
+
+        // Generate UPI QR Code
+        function generateQRCode(plate, amount) {
+            // Clear previous QR code
+            const qrContainer = document.getElementById('qrcode');
+            qrContainer.innerHTML = '';
+
+            if (amount === 0) {
+                qrContainer.innerHTML = '<p style="color: #666; padding: 20px;">No payment required</p>';
+                return;
+            }
+
+            // UPI payment link using configured values
+            const upiId = upiConfig.upiId;
+            const upiName = upiConfig.upiName;
+            const upiLink = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(upiName)}&am=${amount}&cu=INR&tn=${encodeURIComponent('Parking - ' + plate)}`;
+
+            // Generate QR code
+            qrCode = new QRCode(qrContainer, {
+                text: upiLink,
+                width: 200,
+                height: 200,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+
+        // Show error message
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            resultSection.style.display = 'none';
+        }
+    </script>
+</body>
+</html>

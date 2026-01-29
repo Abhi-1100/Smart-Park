@@ -1,0 +1,6 @@
+{
+  "entry1": { "number_plate": "KA01AB1234", "date_time": "2026-01-29T09:00:00" },
+  "entry2": { "number_plate": "KA01AB1234", "date_time": "2026-01-29T11:30:00" },
+  "entry3": { "number_plate": "KA02XY9999", "date_time": "2026-01-29T10:15:00" },
+  "entry4": { "number_plate": "KA03ZZ0001", "date_time": "2026-01-29T12:05:00" }
+}
