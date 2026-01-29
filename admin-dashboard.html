@@ -544,6 +544,22 @@
         let parkingData = [];
         let processedData = [];
 
+        // Number Plate Validation Regex
+        // Supports Indian vehicle number plate formats:
+        // Standard: XX00XX0000 (e.g., KA01AB1234)
+        // Old format: XX00X0000 (e.g., MH12A1234)
+        // BH series: 00BH0000XX (e.g., 22BH1234AB)
+        // Diplomatic: 00CD0000 or 00CC0000
+        const numberPlateRegex = /^[A-Z]{2}[0-9]{1,2}[A-Z]{1,3}[0-9]{1,4}$|^[0-9]{2}BH[0-9]{4}[A-Z]{1,2}$|^[0-9]{2}(CD|CC)[0-9]{1,4}$|^[A-Z]{2}[0-9]{1,2}[0-9]{1,4}$/i;
+
+        // Validate number plate format
+        function isValidNumberPlate(plate) {
+            if (!plate || typeof plate !== 'string') return false;
+            // Remove spaces and special characters for validation
+            const cleanPlate = plate.replace(/[\s\-\.]/g, '').toUpperCase();
+            return numberPlateRegex.test(cleanPlate);
+        }
+
         // DOM Elements
         const loginContainer = document.getElementById('loginContainer');
         const dashboard = document.getElementById('dashboard');
@@ -599,19 +615,32 @@
         // Helper: convert raw object data to parkingData array and update UI
         function processRawDataObject(dataObj) {
             parkingData = [];
+            let invalidCount = 0;
+            
             if (dataObj) {
                 Object.keys(dataObj).forEach(key => {
                     const entry = dataObj[key];
                     // Support both `number_plate` and `numberPlate` keys
                     const plateVal = entry.number_plate || entry.numberPlate || entry.plate || '';
+                    
                     if (plateVal && plateVal !== 'NULL') {
-                        parkingData.push({
-                            id: key,
-                            plate: plateVal,
-                            timestamp: entry.date_time || entry.dateTime || entry.timestamp || entry.time
-                        });
+                        // Validate number plate format before adding
+                        if (isValidNumberPlate(plateVal)) {
+                            parkingData.push({
+                                id: key,
+                                plate: plateVal.replace(/[\s\-\.]/g, '').toUpperCase(),
+                                timestamp: entry.date_time || entry.dateTime || entry.timestamp || entry.time
+                            });
+                        } else {
+                            invalidCount++;
+                            console.warn(`Invalid number plate format skipped: ${plateVal}`);
+                        }
                     }
                 });
+            }
+            
+            if (invalidCount > 0) {
+                console.log(`${invalidCount} invalid number plate(s) were filtered out`);
             }
 
             processedData = processParkingData(parkingData);
